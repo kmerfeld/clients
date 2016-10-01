@@ -188,9 +188,9 @@ def processTurn(serverResponse):
             except ZeroDivisionError: # celebratory division by zero when we win
                 pass
 
-    riskiness = 0.5
+    riskiness = 0.3
     highrisk = riskiness + .1
-    lowrisk = 0.5 - 0.1
+    lowrisk = riskiness - 0.1
 
 
     for d in range(0,len(myteam)):
