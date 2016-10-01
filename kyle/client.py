@@ -23,12 +23,12 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "Druid",
-                 "ClassId": "Assassin"},
-                {"CharacterName": "Archer",
-                 "ClassId": "Assassin"},
-                {"CharacterName": "Warrior",
-                 "ClassId": "Assassin"},
+                {"CharacterName": "MURICA WIZARD",
+                 "ClassId": "Wizard"},
+                {"CharacterName": "MURICA PALADIN",
+                 "ClassId": "Paladin"},
+                {"CharacterName": "MURICA ARCHER",
+                 "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -56,38 +56,39 @@ def processTurn(serverResponse):
 
     #Value of characters
     def get_priority( char ):
-        if char.name == "Archer":
+        if char.classId == "Archer":
             priority = 10
-        if char.name == "Assasin":
+        if char.classId == "Assasin":
             priority = 9
-        if char.name == "Druid":
+        if char.classId == "Druid":
             priority = 8
-        if char.name == "Enchanter":
+        if char.classId == "Enchanter":
             priority = 7
-        if char.name == "Paladin":
+        if char.classId == "Paladin":
             priority = 6
-        if char.name == "Sorcerer":
+        if char.classId == "Sorcerer":
             priority = 5
-        if char.name == "Warrior":
+        if char.classId == "Warrior":
             priority = 4
-        if char.name == "Wizard":
+        if char.classId == "Wizard":
             priority = 3
-    
-    # Choose a target
-   
 
-    #TODO: find enemy that is most benefitial to kill
+        return priority
+    # Choose a target
     target = None
     
+
+
     #get list of living characters
     living_characters = []
     for character in enemyteam:
         if not character.is_dead():
             living_characters.append(character) 
 
-    
+    if len(living_characters) > 0:
+        target = living_characters[0]
+
     #get highest priority
-    target = living_characters[0]
     for character in living_characters:
         if get_priority(target) < get_priority(character):
             target = character
