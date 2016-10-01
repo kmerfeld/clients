@@ -23,12 +23,12 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "MURICA WIZARD",
-                 "ClassId": "Wizard"},
-                {"CharacterName": "MURICA PALADIN",
-                 "ClassId": "Paladin"},
-                {"CharacterName": "MURICA ARCHER",
-                 "ClassId": "Archer"},
+                {"CharacterName": "Assassin b",
+                 "ClassId": "Assassin"},
+                {"CharacterName": "Heal_Bitch",
+                 "ClassId": "Druid"},
+                {"CharacterName": "TANK",
+                 "ClassId": "Assassin"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -52,18 +52,18 @@ def processTurn(serverResponse):
                 character.serialize(characterJson)
                 enemyteam.append(character)
 # ------------------ You shouldn't change above but you can ---------------
-
+       
 
     #Value of characters
     def get_priority( char ):
         if char.classId == "Archer":
-            priority = 10
+            priority = 7
         if char.classId == "Assasin":
             priority = 9
         if char.classId == "Druid":
             priority = 8
         if char.classId == "Enchanter":
-            priority = 7
+            priority = 10
         if char.classId == "Paladin":
             priority = 6
         if char.classId == "Sorcerer":
@@ -93,17 +93,63 @@ def processTurn(serverResponse):
         if get_priority(target) < get_priority(character):
             target = character
     
-    print(target.name)
 
     # If we found a target
     if target:
         for character in myteam:
+            #if character.in_range_of(enemyteam[0], gameMap):
+            #    print("In range Still moving!!!!" + enemyteam[0].name)
+            #if character.in_range_of(enemyteam[1], gameMap):
+            #    print("In range Still moving!!!!" + enemyteam[1].name)
+            #if character.in_range_of(enemyteam[2], gameMap):
+            #    print("In range Still moving!!!!" + enemyteam[2].name)
+
             # If I am in range, either move towards target
             if character.in_range_of(target, gameMap):
+                #TODO: reconsider target
+
                 # Am I already trying to cast something?
                 if character.casting is None:
                     cast = False
                     for abilityId, cooldown in character.abilities.items():
+                        #TODO: set move order for each class
+
+                        
+                        #Druid
+                        if character.classId == "Druid":
+                            #heal
+                            character.can_use_ability()
+                            #get target (lowest health)
+                            char = myteam[0]
+            
+                            #get lowest health
+                            #TODO: fix this
+                            for unit in myteam:
+                                if unit.attributes.health > char:
+                                    char = unit
+                            if char.attributes.health < 600:
+
+                                print("Druid is going to heal " + char.classId + "Its health is " + str(char.attributes.health))
+                             
+                                #apply heal
+                                
+                                #Do I have an ability not on cooldown
+                                if cooldown == 0:
+                                    # If I can, then cast it
+                                    ability = game_consts.abilitiesList[int(abilityId)]
+                                    # Get ability
+                                    actions.append({
+                                        "Action": "Cast",
+                                        "CharacterId": character.id,
+                                        # Am I buffing or debuffing? If buffing, target myself
+                                        "TargetId": char.id,
+                                        "AbilityId": int(abilityId)
+                                    })
+                                    cast = True
+                                    break
+
+
+
                         # Do I have an ability not on cooldown
                         if cooldown == 0:
                             # If I can, then cast it
@@ -125,8 +171,9 @@ def processTurn(serverResponse):
                             "CharacterId": character.id,
                             "TargetId": target.id,
                         })
+
             else: # Not in range, move towards
-                actions.append({
+                    actions.append({
                     "Action": "Move",
                     "CharacterId": character.id,
                     "TargetId": target.id,
