@@ -14,7 +14,7 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "Test"
+teamName = "ming"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
