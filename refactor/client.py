@@ -44,7 +44,8 @@ armorWeight = .1
 
 global init
 init = True
-
+global startingPosition
+startingPosition = 0
 
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
@@ -75,6 +76,8 @@ def processTurn(serverResponse):
             enemyattack[d] = enemyteam[d].attributes.damage * damageWeight
         for d in range(0,len(myteam)):
             myattack[d] = myteam[d].attributes.damage * damageWeight
+        global startingPosition
+        startingPosition = (myteam[0].position[0], myteam[0].position[1])
 # ------------------ You shouldn't change above but you can ---------------
 
     deliciousness = [0,0,0] # appeal to attack
@@ -103,7 +106,14 @@ def processTurn(serverResponse):
 #-------------------Archer----------------------------------------
 
     character = myteam[0]
-    if character.in_range_of(target, gameMap):
+    if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != startingPosition:
+        actions.append({
+            "Action": "Move",
+            "CharacterId": character.id,
+            "Location": startingPosition,
+        })
+
+    elif character.in_range_of(target, gameMap):
         burst = 0
         sprint = 12
         armorDebuff = 2
