@@ -1,6 +1,6 @@
 #!/usr/bin/python2
 import socket
-import json
+import json 
 import os
 import random
 import sys
@@ -111,6 +111,7 @@ def processTurn(serverResponse):
                 # Am I already trying to cast something?
                 if character.casting is None:
                     cast = False
+
                     for abilityId, cooldown in character.abilities.items():
                         #TODO: set move order for each class
 
@@ -118,37 +119,40 @@ def processTurn(serverResponse):
                         #Druid
                         if character.classId == "Druid":
                             #heal
-                            character.can_use_ability()
-                            #get target (lowest health)
                             char = myteam[0]
             
                             #get lowest health
                             #TODO: fix this
                             for unit in myteam:
                                 if unit.attributes.health > char:
-                                    char = unit
-                            if char.attributes.health < 600:
+                                        char = unit
+                        
+
+                            #check if not worth healing
+                            if not char.attributes.health > 700 and char.attributes.health > 0:         
 
                                 print("Druid is going to heal " + char.classId + "Its health is " + str(char.attributes.health))
-                             
+                                print(int(abilityId))
                                 #apply heal
                                 
                                 #Do I have an ability not on cooldown
                                 if cooldown == 0:
                                     # If I can, then cast it
-                                    ability = game_consts.abilitiesList[int(abilityId)]
+                            
+
+                                    ability = game_consts.abilitiesList[0]
                                     # Get ability
                                     actions.append({
                                         "Action": "Cast",
                                         "CharacterId": character.id,
                                         # Am I buffing or debuffing? If buffing, target myself
                                         "TargetId": char.id,
-                                        "AbilityId": int(abilityId)
+                                        "AbilityId": 3
                                     })
                                     cast = True
                                     break
 
-
+                            
 
                         # Do I have an ability not on cooldown
                         if cooldown == 0:

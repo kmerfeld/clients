@@ -1,3 +1,4 @@
+#!/usr/bin/python2
 import socket
 import json
 import os
@@ -150,4 +151,4 @@ if __name__ == "__main__":
         if e.errno != errno.ECONNRESET:
             raise  # Not error we are looking for
         pass  # Handle error here.
-s.close()
+    s.close()
