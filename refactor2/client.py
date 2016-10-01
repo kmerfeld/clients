@@ -15,7 +15,7 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "refactor"
+teamName = "MURICA"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -23,11 +23,11 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "Archer",
+                {"CharacterName": "TRUMP",
                  "ClassId": "Archer"},
-                {"CharacterName": "Archer",
+                {"CharacterName": "CLINTON",
                  "ClassId": "Archer"},
-                {"CharacterName": "Archer",
+                {"CharacterName": "JOHNSON",
                  "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
@@ -92,7 +92,7 @@ class Bot():
 
 
     def archer(self, character, index):
-        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not self.kiteReleased > 0 or self.kiteReleased == index:
+        if character.attributes.health < 0.75*character.attributes.maxHealth and character.position != self.startingPosition and not self.kiteReleased > 0 or self.kiteReleased == index:
             self.kiteReleased = index
             self.laps(character)
             pass
@@ -125,13 +125,17 @@ class Bot():
                         self.runningAroundmode = False
         else: # Not in range, move towards
             if self.runningAroundmode and random.randint(0,1)==1:
-                if random.randint(0,1)==1:
+                targetavaliable = False
+                for a in self.enemyteam:
+                    if character.in_range_of(a, gameMap):
+                        self.attack(character, a)
+                        targetavaliable=True
+                        break;
+                if not targetavaliable:
+                    if character.can_use_ability(self.sprint):
+                        self.cast(character, self.sprint)
+                    
                     self.moveToTarget(character, self.target)
-                else:
-                    for a in self.enemyteam:
-                        if character.in_range_of(a, gameMap):
-                            self.attack(character, a)
-                            break;
             else:
                 if self.runningAround > 15 and not self.runningAroundmode:
                     self.runningAround = self.runningAround + 10
@@ -140,7 +144,7 @@ class Bot():
                     self.runningAround = self.runningAround + 1
                 if self.runningAround > 30:
                     self.runningAround = 30
-                self.moveToTarget(character, self.target)
+                self.moveToTarget(character, self.target) #normal move
         print(self.runningAround)
         print(self.runningAroundmode)
 
@@ -212,6 +216,14 @@ class Bot():
             for d in range(0,len(self.myteam)):
                 self.myattack[d] = self.myteam[d].attributes.damage * self.damageWeight
             self.startingPosition = (self.myteam[0].position[0], self.myteam[0].position[1])
+            self.count = 0
+            for f in self.enemyteam:
+                if f.classId == "Warrior":
+                    self.count = self.count +1
+        if self.count > 1:
+            self.kiteReleased = 0
+            #self.runningAround = 0
+            #self.runningAroundmode = False
     # ------------------ You shouldn't change above but you can ---------------
         self.get_enemy_target(self.myteam)
         deliciousness = [0,0,0] # appeal to attack
