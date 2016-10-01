@@ -41,11 +41,22 @@ enemydefense = [0, 0, 0]
 damageWeight = 1.0
 healthWeight = .1 #must be floating point
 armorWeight = .1
+useArmorDebuff = True
+
+global kiteReleased
+kiteReleased = False
 
 global init
 init = True
 global startingPosition
 startingPosition = 0
+
+def moveToTarget(character, target):
+    actions.append({
+        "Action": "Move",
+        "CharacterId": character.id,
+        "TargetId": target.id,
+    })
 
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
@@ -106,7 +117,9 @@ def processTurn(serverResponse):
 #-------------------Archer----------------------------------------
 
     character = myteam[0]
-    if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != startingPosition:
+    if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != startingPosition and not kiteReleased:
+        global kiteReleased
+        kiteReleased = True
         actions.append({
             "Action": "Move",
             "CharacterId": character.id,
@@ -134,7 +147,7 @@ def processTurn(serverResponse):
             else:
                 for abilityId, cooldown in character.abilities.items():
                     # Do I have an ability not on cooldown
-                    if abilityId == armorDebuff and cooldown == 0: #cast armor debuff
+                    if useArmorDebuff and abilityId == armorDebuff and cooldown == 0: #cast armor debuff
                         # If I can, then cast it
                         ability = game_consts.abilitiesList[int(abilityId)]
                         # Get ability
@@ -162,25 +175,45 @@ def processTurn(serverResponse):
 
 #------------------------------------------------------
     character = myteam[1]
-    if character.in_range_of(target, gameMap):
+    if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != startingPosition and not kiteReleased:
+        global kiteReleased
+        kiteReleased = True
+        actions.append({
+            "Action": "Move",
+            "CharacterId": character.id,
+            "Location": startingPosition,
+        })
+
+    elif character.in_range_of(target, gameMap):
         # Am I already trying to cast something?
         if character.casting is None:
             cast = False
-            for abilityId, cooldown in character.abilities.items():
-                # Do I have an ability not on cooldown
-                if False:# cooldown == 0:
-                    # If I can, then cast it
-                    ability = game_consts.abilitiesList[int(abilityId)]
-                    # Get ability
-                    actions.append({
-                        "Action": "Cast",
-                        "CharacterId": character.id,
-                        # Am I buffing or debuffing? If buffing, target myself
-                        "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
-                        "AbilityId": int(abilityId)
-                    })
-                    cast = True
-                    break
+            if character.attributes.get_attribute("Stunned") or character.attributes.get_attribute("Silenced") or character.attributes.get_attribute("Rooted"): #burst if crowd controlled
+                crowdcontrolled = True
+                actions.append({
+                "Action": "Cast",
+                "CharacterId": character.id,
+                # Am I buffing or debuffing? If buffing, target myself
+                "TargetId": character.id,
+                "AbilityId": int(burst)
+                })
+                cast = True
+            else:
+                for abilityId, cooldown in character.abilities.items():
+                    # Do I have an ability not on cooldown
+                    if False:# cooldown == 0:
+                        # If I can, then cast it
+                        ability = game_consts.abilitiesList[int(abilityId)]
+                        # Get ability
+                        actions.append({
+                            "Action": "Cast",
+                            "CharacterId": character.id,
+                            # Am I buffing or debuffing? If buffing, target myself
+                            "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+                            "AbilityId": int(abilityId)
+                        })
+                        cast = True
+                        break
             # Was I able to cast something? Either wise attack
             if not cast:
                 actions.append({
@@ -198,7 +231,16 @@ def processTurn(serverResponse):
 #-------------------------------------------------------
 
     character = myteam[2]
-    if character.in_range_of(target, gameMap):
+    if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != startingPosition and not kiteReleased:
+        global kiteReleased
+        kiteReleased = True
+        actions.append({
+            "Action": "Move",
+            "CharacterId": character.id,
+            "Location": startingPosition,
+        })
+
+    elif character.in_range_of(target, gameMap):
         # Am I already trying to cast something?
         if character.casting is None:
             cast = False
