@@ -14,7 +14,7 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "ming"
+teamName = "No_armor"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -257,24 +257,24 @@ def processTurn(serverResponse):
                             # Am I already trying to cast something?
                             if character.casting is None:
                                 cast = False
-                               # for abilityId, cooldown in character.abilities.items():
-                               #     # Do I have an ability not on cooldown
-                               #     if cooldown == 0:
-                               #         # If I can, then cast it
-                               #         ability = game_consts.abilitiesList[int(abilityId)]
-                               #         if not character.classId == "Enchanter" and  ability["StatChanges"][0]["Change"] >= 0: # only use offensive abilities
-                               #             continue
-                               #         # Get ability
-                               #         actions.append({
-                               #             "Action": "Cast",
-                               #             "CharacterId": character.id,
-                               #             # Am I buffing or debuffing? If buffing, target myself
-                               #             "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
-                               #             "AbilityId": int(abilityId)
-                               #         })
-                               #         cast = True
-                               #         break
-                               # # Was I able to cast something? Either wise attack
+                                #for abilityId, cooldown in character.abilities.items():
+                                #    # Do I have an ability not on cooldown
+                                #    if cooldown == 0:
+                                #        # If I can, then cast it
+                                #        ability = game_consts.abilitiesList[int(abilityId)]
+                                #        if not character.classId == "Enchanter" and  ability["StatChanges"][0]["Change"] >= 0: # only use offensive abilities
+                                #            continue
+                                #        # Get ability
+                                #        actions.append({
+                                #            "Action": "Cast",
+                                #            "CharacterId": character.id,
+                                #            # Am I buffing or debuffing? If buffing, target myself
+                                #            "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+                                #            "AbilityId": int(abilityId)
+                                #        })
+                                #        cast = True
+                                #        break
+                                # Was I able to cast something? Either wise attack
                                 if True:
                                     actions.append({
                                         "Action": "Attack",
