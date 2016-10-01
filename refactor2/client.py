@@ -48,6 +48,8 @@ class Bot():
         self.init = True
         self.startingPosition = 0
 
+        self.turnCount = 0
+
         self.previousHealth = [0,0,0]
 
     def moveToTarget(self, character, target):
@@ -57,14 +59,32 @@ class Bot():
             "TargetId": target.id,
         })
 
+    def moveToLocation(self, character, location):
+        self.actions.append({
+            "Action": "Move",
+            "CharacterId": character.id,
+            "Location": location,
+        })
+
+    def cast(self, character, abilityId):
+        self.actions.append({
+        "Action": "Cast",
+        "CharacterId": character.id,
+        "TargetId": character.id,
+        "AbilityId": int(abilityId)
+        })
+
+    def attack(self, character, target):
+        self.actions.append({
+            "Action": "Attack",
+            "CharacterId": character.id,
+            "TargetId": target.id,
+        })
+
     def archer(self, character):
         if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not kiteReleased:
             self.kiteReleased = True
-            self.actions.append({
-                "Action": "Move",
-                "CharacterId": character.id,
-                "Location": self.startingPosition,
-            })
+            self.moveToLocation(character, self.startingPosition)
 
         elif character.in_range_of(self.target, gameMap):
             self.burst = 0
@@ -75,13 +95,7 @@ class Bot():
                 cast = False
                 if character.attributes.get_attribute("Stunned") or character.attributes.get_attribute("Silenced") or character.attributes.get_attribute("Rooted"): #burst if crowd controlled
                     crowdcontrolled = True
-                    self.actions.append({
-                    "Action": "Cast",
-                    "CharacterId": character.id,
-                    # Am I buffing or debuffing? If buffing, target myself
-                    "TargetId": character.id,
-                    "AbilityId": int(self.burst)
-                    })
+                    self.cast(character, self.burst)
                     cast = True
 
                 else:
@@ -91,27 +105,14 @@ class Bot():
                             # If I can, then cast it
                             ability = game_consts.abilitiesList[int(abilityId)]
                             # Get ability
-                            self.actions.append({
-                                "Action": "Cast",
-                                "CharacterId": character.id,
-                                "TargetId": self.target.id,
-                                "AbilityId": int(abilityId)
-                            })
+                            self.cast(character, abilityId)
                             cast = True
                             break
                 # Was I able to cast something? Either wise attack
                 if not cast:
-                    self.actions.append({
-                        "Action": "Attack",
-                        "CharacterId": character.id,
-                        "TargetId": self.target.id,
-                    })
+                    self.attack(character, self.target)
         else: # Not in range, move towards
-            self.actions.append({
-                "Action": "Move",
-                "CharacterId": character.id,
-                "TargetId": self.target.id,
-            })
+            self.moveToTarget(character, self.target)
 
 # Determine actions to take on a given turn, given the server response
     def processTurn(self, serverResponse):
