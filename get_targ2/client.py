@@ -23,11 +23,11 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "Archer1",
+                {"CharacterName": "Archer",
                  "ClassId": "Archer"},
-                {"CharacterName": "Archer2",
+                {"CharacterName": "Archer",
                  "ClassId": "Archer"},
-                {"CharacterName": "Archer3",
+                {"CharacterName": "Archer",
                  "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
@@ -48,9 +48,15 @@ class Bot():
         self.init = True
         self.startingPosition = 0
 
+        self.burst = 0
+        self.sprint = 12
+        self.armorDebuff = 2
+
         self.turnCount = 0
 
         self.previousHealth = [0,0,0]
+        self.landmarks = [(0,0), (4,0), (4,4), (0,4)]
+        self.targetCorner = 0
 
     def moveToTarget(self, character, target):
         self.actions.append({
@@ -80,37 +86,14 @@ class Bot():
             "CharacterId": character.id,
             "TargetId": target.id,
         })
-    
-    def get_enemy_target(self, myteam):
-        #assume target is the one with the lowest health
-        #TODO: make this not terrible
-        print(self.previousHealth)
-        #get unit with lowest biggest change in health
-        diff0 = self.previousHealth[0] - self.myteam[0].attributes.health
-        diff1 = self.previousHealth[1] - self.myteam[1].attributes.health
-        diff2 = self.previousHealth[2] - self.myteam[2].attributes.health
 
-
-        lowest_char = 0
-        biggest = diff0
-        if diff1 > biggest:
-            biggest = diff1
-            lowest_char = 1
-        if diff2 > biggest:
-            biggest = diff2
-            lowest_char = 2
-
-        return lowest_char
 
     def archer(self, character):
-        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not kiteReleased:
+        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not self.kiteReleased:
             self.kiteReleased = True
             self.moveToLocation(character, self.startingPosition)
 
         elif character.in_range_of(self.target, gameMap):
-            self.burst = 0
-            sprint = 12
-            armorDebuff = 2
             # Am I already trying to cast something?
             if character.casting is None:
                 cast = False
@@ -122,7 +105,7 @@ class Bot():
                 else:
                     for abilityId, cooldown in character.abilities.items():
                         # Do I have an ability not on cooldown
-                        if self.useArmorDebuff and abilityId == armorDebuff and cooldown == 0: #cast armor debuff
+                        if self.useArmorDebuff and abilityId == self.armorDebuff and cooldown == 0: #cast armor debuff
                             # If I can, then cast it
                             ability = game_consts.abilitiesList[int(abilityId)]
                             # Get ability
@@ -134,6 +117,44 @@ class Bot():
                     self.attack(character, self.target)
         else: # Not in range, move towards
             self.moveToTarget(character, self.target)
+
+
+    def get_enemy_target(self, myteam):
+        #assume target is the one with the lowest health
+        #TODO: make this not terrible
+        #get unit with lowest biggest change in health
+        diff0 = self.previousHealth[0] - self.myteam[0].attributes.health
+        diff1 = self.previousHealth[1] - self.myteam[1].attributes.health 
+        diff2 = self.previousHealth[2] - self.myteam[2].attributes.health
+
+
+        biggest = diff0
+        lowest = 0
+        if diff1 > biggest:
+            biggest = diff1
+            lowest = 1
+        if diff2 > biggest:
+            biggest = 2
+            lowest = 2
+        print("THIS IS THEIR TARGET " + str(lowest))
+        return lowest
+
+    def distance(p1, p2):
+            return ((p2[0]-p1[0])**2.0 + (p2[1]-p1[1])**2.0)**.5
+
+    def laps(self, character):
+        if character.can_use_ability(self.sprint):
+            self.cast(character, self.sprint)
+        else:
+            #print(character.position)
+            #print(self.targetCorner)
+            #print(self.landmarks[self.targetCorner])
+            if character.position != self.landmarks[self.targetCorner]:
+                self.moveToLocation(character, self.landmarks[self.targetCorner])
+            if character.position == self.landmarks[self.targetCorner]:
+                self.targetCorner = self.targetCorner+1
+                if self.targetCorner > len(self.landmarks)-1:
+                    self.targetCorner = 0
 
 # Determine actions to take on a given turn, given the server response
     def processTurn(self, serverResponse):
@@ -156,9 +177,10 @@ class Bot():
                     self.enemyteam.append(character)
 
 
+
         if self.init: # run this stuff once after figuring out the enemy composition
-            print("init")
-            init = False
+            #print("init")
+            self.init = False
             for d in range(0,len(self.enemyteam)):
                 self.enemyattack[d] = self.enemyteam[d].attributes.damage * self.damageWeight
             for d in range(0,len(self.myteam)):
@@ -179,26 +201,28 @@ class Bot():
                 deliciousness[d] = self.enemyattack[d] / self.enemydefense[d]
                 if deliciousness[d] > deliciousness[maxDelish]:
                     maxDelish = d
-
-                                                                                                                                                       
+                                                                                                                                                                
 
         # Choose a target
         self.target = self.enemyteam[maxDelish]
-        print(str(self.get_enemy_target(self.myteam)))
-        
+
     #-------------------Archer----------------------------------------
+        print(str(self.get_enemy_target(self.myteam)))
 
         character = self.myteam[0]
-        self.archer(character)
+        #self.archer(character)
+        self.laps(character)
+        self.previousHealth[0] = character.attributes.health
 
     #------------------------------------------------------
         character = self.myteam[1]
         self.archer(character)
-
+        self.previousHealth[1] = character.attributes.health
     #-------------------------------------------------------
 
         character = self.myteam[2]
         self.archer(character)
+        self.previousHealth[2] = character.attributes.health
 
     #-------------------------------------------------------
         # Send actions to the server
