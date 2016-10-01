@@ -56,6 +56,7 @@ def processTurn(serverResponse):
 
     #Value of characters
     def get_priority( char ):
+	priority = 20
         if char.classId == "Archer":
             priority = 7
         if char.classId == "Assasin":
