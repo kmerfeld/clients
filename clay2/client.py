@@ -15,7 +15,7 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "\'MURICA!!!"
+teamName = "\Soviet Russia"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -23,12 +23,12 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "Warrior",
-                 "ClassId": "Warrior"},
-                {"CharacterName": "BOB",
-                 "ClassId": "Warrior"},
-                {"CharacterName": "Dude",
-                 "ClassId": "Warrior"},
+                {"CharacterName": "Assassin1",
+                 "ClassId": "Assassin"},
+                {"CharacterName": "Assassin2",
+                 "ClassId": "Assassin"},
+                {"CharacterName": "Assassin3",
+                 "ClassId": "Assassin"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -176,10 +176,12 @@ def processTurn(serverResponse):
                                     cast = True
                                     break
                         #Warrior
-                        if character.name == "Warrior":
+                        if character.classId == "Warrior":
                             if character.can_use_ability(0):
+				print("can use break")
                                 #self armor buff
                                 if character.attributes.get_attribute("Stunned"):
+				    print("does use break")
                                     actions.append({
                                         "Action": "Cast",
                                         "CharacterId": character.id,
@@ -190,8 +192,10 @@ def processTurn(serverResponse):
                                     cast = True
                                     break
                             if character.can_use_ability(15):
+				print("can use armor buff")
                                 #self armor buff
                                 if character.attributes.health < 1000 and character.attributes.health > 0:
+				    print("does use armor buff")
                                     actions.append({
                                         "Action": "Cast",
                                         "CharacterId": character.id,
@@ -201,97 +205,17 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-			    if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[0], gameMap, 1):
-				if enemyteam[0].is_dead:
-                                    thing = enemyteam[0]
-                                    print(character.name + " stunned " + thing.name)
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": thing.id,
-                                        "AbilityId": 1
-                                    })
-                                    cast = True
-                                    break
-                        #Warrior
-                        if character.name == "BOB":
-                            if character.can_use_ability(0):
-                                #self armor buff
-                                if character.attributes.get_attribute("Stunned"):
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": character.id,
-                                        "AbilityId": 0
-                                    })
-                                    cast = True
-                                    break
-                            if character.can_use_ability(15):
-                                #self armor buff
-                                if character.attributes.health < 1000 and character.attributes.health > 0:
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": character.id,
-                                        "AbilityId": 15
-                                    })
-                                    cast = True
-                                    break
-			    if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[1], gameMap, 1):
-				if enemyteam[1].is_dead:
-                                    thing = enemyteam[1]
-                                    print(character.name + " stunned " + thing.name)
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": thing.id,
-                                        "AbilityId": 1
-                                    })
-                                    cast = True
-                                    break
-                        #Warrior
-                        if character.name == "Dude":
-                            if character.can_use_ability(0):
-                                #self armor buff
-                                if character.attributes.get_attribute("Stunned"):
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": character.id,
-                                        "AbilityId": 0
-                                    })
-                                    cast = True
-                                    break
-                            if character.can_use_ability(15):
-                                #self armor buff
-                                if character.attributes.health < 1000 and character.attributes.health > 0:
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": character.id,
-                                        "AbilityId": 15
-                                    })
-                                    cast = True
-                                    break
-			    if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[2], gameMap, 1):
-				if enemyteam[2].is_dead:
-                                    thing = enemyteam[2]
-                                    print(character.name + " stunned " + thing.name)
-                                    actions.append({
-                                        "Action": "Cast",
-                                        "CharacterId": character.id,
-                                        # Am I buffing or debuffing? If buffing, target myself
-                                        "TargetId": thing.id,
-                                        "AbilityId": 1
-                                    })
-                                    cast = True
-                                    break
+			    if character.can_use_ability(1):
+				print("can use stun")
+                                actions.append({
+                                    "Action": "Cast",
+                                    "CharacterId": character.id,
+                                    # Am I buffing or debuffing? If buffing, target myself
+                                    "TargetId": target.id,
+                                    "AbilityId": 1
+                                })
+                                cast = True
+                                break
                             
 
                         #Assassin
