@@ -1,0 +1,36 @@
+neural network
+weights on every single stat
+
+make a danger map
+	mark every tile with a score indicating how many negative effects can be had
+	each char adds numbers to danger map
+	cast target gets a multiplier
+	every my team member gets a map
+	move toward higher number until risk threshold
+	most people are probably not going to separate their team
+
+attack score for each character
+	decreases when abilities are on cooldown
+	function of how much damage char can cause
+	how to handle movement?
+		use this score to make danger map
+	buffs apply multiplier
+	add a bonus to support character
+	healing increases score
+	this first
+	does not change so the attack priority stays high
+
+defense score for each character
+	function of how able character is able to resist damage
+	resistance to stuns
+		abilities to remove stuns
+		character with ranged buffs increase defense for all characters
+
+attack highest attack score with lowest defense score
+
+team power score
+	each action would change score
+	function of current team health and stats with buffs and debuffs
+	perform actions to minimize enemy score and maximize own score
+
+Do not try attacks on own team

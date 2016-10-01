@@ -1,0 +1,4 @@
+implement break
+implement microing
+	move archer back one tile when injured and other 2 archers are alive
+	hopefully they will follow and loose a turn
