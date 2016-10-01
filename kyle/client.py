@@ -82,6 +82,8 @@ def processTurn(serverResponse):
     #get list of living characters
     living_characters = []
     for character in enemyteam:
+        character.abilities.__init__
+        character.get_
         if not character.is_dead():
             living_characters.append(character) 
 
