@@ -43,7 +43,7 @@ class Bot():
         self.armorWeight = .1
         self.useArmorDebuff = False
 
-        self.kiteReleased = False
+        self.kiteReleased = -1
 
         self.init = True
         self.startingPosition = 0
@@ -91,10 +91,11 @@ class Bot():
         })
 
 
-    def archer(self, character):
-        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not self.kiteReleased:
-            self.kiteReleased = True
-            self.moveToLocation(character, self.startingPosition)
+    def archer(self, character, index):
+        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not self.kiteReleased > 0 or self.kiteReleased == index:
+            self.kiteReleased = index
+            self.laps(character)
+            pass
 
         elif character.in_range_of(self.target, gameMap):
             # Am I already trying to cast something?
@@ -147,23 +148,22 @@ class Bot():
     def get_enemy_target(self, myteam):
         #assume target is the one with the lowest health
         #TODO: make this not terrible
-        print(self.previousHealth)
         #get unit with lowest biggest change in health
         diff0 = self.previousHealth[0] - self.myteam[0].attributes.health
-        diff1 = self.previousHealth[1] - self.myteam[1].attributes.health
+        diff1 = self.previousHealth[1] - self.myteam[1].attributes.health 
         diff2 = self.previousHealth[2] - self.myteam[2].attributes.health
 
 
-        lowest_char = 0
         biggest = diff0
+        lowest = 0
         if diff1 > biggest:
             biggest = diff1
-            lowest_char = 1
+            lowest = 1
         if diff2 > biggest:
-            biggest = diff2
-            lowest_char = 2
-
-        return lowest_char
+            biggest = 2
+            lowest = 2
+        print("THIS IS THEIR TARGET " + str(lowest))
+        return lowest
 
     def distance(p1, p2):
             return ((p2[0]-p1[0])**2.0 + (p2[1]-p1[1])**2.0)**.5
@@ -213,7 +213,7 @@ class Bot():
                 self.myattack[d] = self.myteam[d].attributes.damage * self.damageWeight
             self.startingPosition = (self.myteam[0].position[0], self.myteam[0].position[1])
     # ------------------ You shouldn't change above but you can ---------------
-
+        self.get_enemy_target(self.myteam)
         deliciousness = [0,0,0] # appeal to attack
         maxDelish = 0
         maxDanger = 0
@@ -235,18 +235,17 @@ class Bot():
     #-------------------Archer----------------------------------------
 
         character = self.myteam[0]
-        #self.archer(character)
-        self.laps(character)
+        self.archer(character, 0)
         self.previousHealth[0] = character.attributes.health
 
     #------------------------------------------------------
         character = self.myteam[1]
-        self.archer(character)
+        self.archer(character, 1)
         self.previousHealth[1] = character.attributes.health
     #-------------------------------------------------------
 
         character = self.myteam[2]
-        self.archer(character)
+        self.archer(character, 2)
         self.previousHealth[2] = character.attributes.health
 
 
