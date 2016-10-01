@@ -355,19 +355,19 @@ def processTurn(serverResponse):
 					cast = True
 					break
                         # Do I have an ability not on cooldown
-##                        if cooldown == 0:
-##                            # If I can, then cast it
-##                            ability = game_consts.abilitiesList[int(abilityId)]
-##                            # Get ability
-##                            actions.append({
-##                                "Action": "Cast",
-##                                "CharacterId": character.id,
-##                                # Am I buffing or debuffing? If buffing, target myself
-##                                "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
-##                                "AbilityId": int(abilityId)
-##                            })
-##                            cast = True
-##                            break
+                        if cooldown == 0:
+                            # If I can, then cast it
+                            ability = game_consts.abilitiesList[int(abilityId)]
+                            # Get ability
+                            actions.append({
+                                "Action": "Cast",
+                                "CharacterId": character.id,
+                                # Am I buffing or debuffing? If buffing, target myself
+                                "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+                                "AbilityId": int(abilityId)
+                            })
+                            cast = True
+                            break
                     # Was I able to cast something? Either wise attack
                     if not cast:
                         actions.append({

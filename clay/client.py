@@ -176,7 +176,7 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-                        #Warrior
+                        #Warrior1
                         if character.name == "Warrior":
                             if character.can_use_ability(0):
                                 #self armor buff
@@ -202,8 +202,8 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-			    if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[0], gameMap, 1):
-				if enemyteam[0].is_dead:
+                            if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[0], gameMap, 1):
+                                if enemyteam[0].is_dead:
                                     thing = enemyteam[0]
                                     print(character.name + " stunned " + thing.name)
                                     actions.append({
@@ -280,8 +280,8 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-			    if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[2], gameMap, 1):
-				if enemyteam[2].is_dead:
+                            if character.can_use_ability(1) and character.in_ability_range_of(enemyteam[2], gameMap, 1):
+                                if enemyteam[2].is_dead:
                                     thing = enemyteam[2]
                                     print(character.name + " stunned " + thing.name)
                                     actions.append({
@@ -293,7 +293,7 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-                            
+                                                        
 
                         #Assassin
                         if character.classId == "Assassin":
