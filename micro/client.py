@@ -257,7 +257,7 @@ def processTurn(serverResponse):
                             # Am I already trying to cast something?
                             if character.casting is None:
                                 cast = False
-                                if target.classId == "Assassin":
+                                if character. == "de":
                                     for abilityId, cooldown in character.abilities.items():
                                         # Do I have an ability not on cooldown
                                         if cooldown == 0:
