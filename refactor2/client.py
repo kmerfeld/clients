@@ -48,9 +48,15 @@ class Bot():
         self.init = True
         self.startingPosition = 0
 
+        self.burst = 0
+        self.sprint = 12
+        self.armorDebuff = 2
+
         self.turnCount = 0
 
         self.previousHealth = [0,0,0]
+        self.landmarks = [(0,0), (4,0), (4,4), (0,4)]
+        self.targetCorner = 0
 
     def moveToTarget(self, character, target):
         self.actions.append({
@@ -81,15 +87,13 @@ class Bot():
             "TargetId": target.id,
         })
 
+
     def archer(self, character):
-        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not kiteReleased:
+        if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not self.kiteReleased:
             self.kiteReleased = True
             self.moveToLocation(character, self.startingPosition)
 
         elif character.in_range_of(self.target, gameMap):
-            self.burst = 0
-            sprint = 12
-            armorDebuff = 2
             # Am I already trying to cast something?
             if character.casting is None:
                 cast = False
@@ -101,7 +105,7 @@ class Bot():
                 else:
                     for abilityId, cooldown in character.abilities.items():
                         # Do I have an ability not on cooldown
-                        if self.useArmorDebuff and abilityId == armorDebuff and cooldown == 0: #cast armor debuff
+                        if self.useArmorDebuff and abilityId == self.armorDebuff and cooldown == 0: #cast armor debuff
                             # If I can, then cast it
                             ability = game_consts.abilitiesList[int(abilityId)]
                             # Get ability
@@ -113,6 +117,20 @@ class Bot():
                     self.attack(character, self.target)
         else: # Not in range, move towards
             self.moveToTarget(character, self.target)
+
+    def distance(p1, p2):
+            return ((p2[0]-p1[0])**2.0 + (p2[1]-p1[1])**2.0)**.5
+
+    def laps(self, character):
+        if len(character.buffs) == 0:
+            self.cast(character, self.sprint)
+        else:
+            if character.position != self.landmarks[self.targetCorner]:
+                self.moveToLocation(character, self.landmarks[self.targetCorner])
+            if character.position == self.landmarks[self.targetCorner]:
+                self.targetCorner = self.targetCorner+1
+                if self.targetCorner > len(self.landmarks)-1:
+                    self.targetCorner = 0
 
 # Determine actions to take on a given turn, given the server response
     def processTurn(self, serverResponse):
@@ -166,7 +184,8 @@ class Bot():
     #-------------------Archer----------------------------------------
 
         character = self.myteam[0]
-        self.archer(character)
+        #self.archer(character)
+        self.laps(character)
 
     #------------------------------------------------------
         character = self.myteam[1]
