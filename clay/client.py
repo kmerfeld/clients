@@ -191,7 +191,7 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-                            elif character.can_use_ability(15):
+                            if character.can_use_ability(15):
 				print("can use armor buff")
                                 #self armor buff
                                 if character.attributes.health < 1000 and character.attributes.health > 0:
@@ -205,7 +205,7 @@ def processTurn(serverResponse):
                                     })
                                     cast = True
                                     break
-			    elif character.can_use_ability(1):
+			    if character.can_use_ability(1):
 				print("can use stun")
                                 actions.append({
                                     "Action": "Cast",
