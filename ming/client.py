@@ -215,10 +215,6 @@ def processTurn(serverResponse):
 
     # Choose a target
     target = enemyteam[maxDelish]
-    #for character in enemyteam:
-    #    if not character.is_dead():
-    #        target = character
-    #        break
 
     for character in myteam:
 
