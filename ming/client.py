@@ -1,3 +1,4 @@
+from __future__ import print_function
 import socket
 import json
 import os
@@ -9,7 +10,6 @@ sys.path.append("../..")
 import src.game.game_constants as game_consts
 from src.game.character import *
 from src.game.gamemap import *
-
 # Game map that you can use to query 
 gameMap = GameMap()
 
@@ -22,17 +22,43 @@ def initialResponse():
 # ------------------------- CHANGE THESE VALUES -----------------------
     return {'TeamName': teamName,
             'Characters': [
-                {"CharacterName": "Druid",
-                 "ClassId": "Druid"},
                 {"CharacterName": "Archer",
                  "ClassId": "Archer"},
-                {"CharacterName": "Warrior",
-                 "ClassId": "Warrior"},
+                {"CharacterName": "Archer",
+                 "ClassId": "Archer"},
+                {"CharacterName": "Archer",
+                 "ClassId": "Archer"},
             ]}
 # ---------------------------------------------------------------------
 
+myattack = [0, 0, 0]
+mydefense = [0, 0, 0]
+enemyattack = [0, 0, 0]
+enemydefense = [0, 0, 0]
+
+damageWeight = 1
+healthWeight = .1
+armorWeight = .1
+
+global init
+init = True
+
+
+def printDanger(dangermap):
+    for a in range(0,5):
+        for b in range(0,5):
+            print(str(dangermap[(b,a)]), end="\t")
+        print("")
+
+    print()
+#    for a in dangermap:
+#        print(str(a) + "\t" + str(dangermap[a]))
+
+
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
+
+
 # --------------------------- CHANGE THIS SECTION -------------------------
     # Setup helper variables
     actions = []
@@ -50,14 +76,76 @@ def processTurn(serverResponse):
                 character = Character()
                 character.serialize(characterJson)
                 enemyteam.append(character)
-# ------------------ You shouldn't change above but you can ---------------
+# ------------------ You shouldn't change above but you can ---------------or 
+    global init
+    if init: # run this stuff once after figuring out the enemy composition
+        print("init")
+        init = False
+        for d in range(0,len(enemyteam)):
+            enemyattack[d] = enemyteam[d].attributes.damage * damageWeight
+
+
+    dangermap = {
+            ( 0 ,  0):0,
+           ( 0 ,  1):0,
+           ( 0 ,  2):0,
+           ( 0 ,  3):0,
+           ( 0 ,  4):0,
+           ( 1 ,  0):0,
+           ( 1 ,  1):0,
+           ( 1 ,  2):0,
+           ( 1 ,  3):0,
+           ( 1 ,  4):0,
+           ( 2 ,  0):0,
+           ( 2 ,  1):0,
+           ( 2 ,  2):0,
+           ( 2 ,  3):0,
+           ( 2 ,  4):0,
+           ( 3 ,  0):0,
+           ( 3 ,  1):0,
+           ( 3 ,  2):0,
+           ( 3 ,  3):0,
+           ( 3 ,  4):0,
+           ( 4 ,  0):0,
+           ( 4 ,  1):0,
+           ( 4 ,  2):0,
+           ( 4 ,  3):0,
+           ( 4 ,  4):0
+           }
+    deliciousness = [0,0,0] # appeal to attack
+    maxDelish = 0
+
+    for d in range(0,len(enemyteam)):
+        if enemyteam[d].is_dead():
+            enemyattack[d] = 0
+            enemydefense[d] = sys.maxint
+        else:
+            tloc = tuple(enemyteam[d].position) # store the location tuple
+            dangermap[tloc] = enemyattack[d] + dangermap[tloc]
+            enemydefense[d] = enemyteam[d].attributes.health * healthWeight + enemyteam[d].attributes.armor * armorWeight
+            deliciousness[d] = enemyattack[d] / enemydefense[d]
+            if deliciousness[d] > deliciousness[maxDelish]:
+                maxDelish = d
+
+
+    print(enemyattack)
+    print(enemydefense)
+    print(deliciousness)
+
+
+#    for c in myteam:
+#        print(c.classId + "\t" + str(c.buffs) + "\t" + str(c.debuffs))
+#    for a in game_consts.abilitiesList[3]:
+#        print(a + "\t" +str( game_consts.abilitiesList[3][a]))
+
+    printDanger(dangermap)
 
     # Choose a target
-    target = None
-    for character in enemyteam:
-        if not character.is_dead():
-            target = character
-            break
+    target = enemyteam[maxDelish]
+    #for character in enemyteam:
+    #    if not character.is_dead():
+    #        target = character
+    #        break
 
     # If we found a target
     if target:
@@ -93,7 +181,7 @@ def processTurn(serverResponse):
                 actions.append({
                     "Action": "Move",
                     "CharacterId": character.id,
-                    "TargetId": target.id,
+                    "Location": (4,0) # top right
                 })
 
     # Send actions to the server
