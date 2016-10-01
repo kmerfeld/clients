@@ -218,7 +218,7 @@ class Bot():
             self.startingPosition = (self.myteam[0].position[0], self.myteam[0].position[1])
             self.count = 0
             for f in self.enemyteam:
-                if f.classId == "Warrior":
+                if f.classId == "Warrior" or f.classId == "Paladin":
                     self.count = self.count +1
         if self.count > 1:
             self.kiteReleased = 0
@@ -230,13 +230,16 @@ class Bot():
         maxDelish = 0
         maxDanger = 0
 
-        for d in range(0,len(self.enemyteam)):
+        for d in reversed(range(0,len(self.enemyteam))):
             if self.enemyteam[d].is_dead():
                 self.enemyattack[d] = 0
                 self.enemydefense[d] = sys.maxint
             else:
                 self.enemydefense[d] = self.enemyteam[d].attributes.health * self.healthWeight + self.enemyteam[d].attributes.armor * self.armorWeight
-                deliciousness[d] = self.enemyattack[d] / self.enemydefense[d]
+                try:
+                    deliciousness[d] = self.enemyattack[d] / self.enemydefense[d]
+                except ZeroDivisionError:
+                    pass
                 if deliciousness[d] > deliciousness[maxDelish]:
                     maxDelish = d
                                                                                                                                                                 
