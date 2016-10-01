@@ -122,9 +122,12 @@ class Bot():
             return ((p2[0]-p1[0])**2.0 + (p2[1]-p1[1])**2.0)**.5
 
     def laps(self, character):
-        if len(character.buffs) == 0:
+        if character.can_use_ability(self.sprint):
             self.cast(character, self.sprint)
         else:
+            print(character.position)
+            print(self.targetCorner)
+            print(self.landmarks[self.targetCorner])
             if character.position != self.landmarks[self.targetCorner]:
                 self.moveToLocation(character, self.landmarks[self.targetCorner])
             if character.position == self.landmarks[self.targetCorner]:
@@ -155,7 +158,7 @@ class Bot():
 
         if self.init: # run this stuff once after figuring out the enemy composition
             print("init")
-            init = False
+            self.init = False
             for d in range(0,len(self.enemyteam)):
                 self.enemyattack[d] = self.enemyteam[d].attributes.damage * self.damageWeight
             for d in range(0,len(self.myteam)):
