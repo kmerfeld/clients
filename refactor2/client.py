@@ -58,6 +58,9 @@ class Bot():
         self.landmarks = [(0,0), (4,0), (4,4), (0,4)]
         self.targetCorner = 0
 
+        self.runningAround = 0
+        self.runningAroundmode = False
+
     def moveToTarget(self, character, target):
         self.actions.append({
             "Action": "Move",
@@ -115,8 +118,30 @@ class Bot():
                 # Was I able to cast something? Either wise attack
                 if not cast:
                     self.attack(character, self.target)
+                    self.runningAround = self.runningAround - 2
+                    if self.runningAround < 0:
+                        self.runningAround = 0
+                        self.runningAroundmode = False
         else: # Not in range, move towards
-            self.moveToTarget(character, self.target)
+            if self.runningAroundmode and random.randint(0,1)==1:
+                if random.randint(0,1)==1:
+                    self.moveToTarget(character, self.target)
+                else:
+                    for a in self.enemyteam:
+                        if character.in_range_of(a, gameMap):
+                            self.attack(character, a)
+                            break;
+            else:
+                if self.runningAround > 15 and not self.runningAroundmode:
+                    self.runningAround = self.runningAround + 10
+                    self.runningAroundmode = True
+                else:
+                    self.runningAround = self.runningAround + 1
+                if self.runningAround > 30:
+                    self.runningAround = 30
+                self.moveToTarget(character, self.target)
+        print(self.runningAround)
+        print(self.runningAroundmode)
 
 
     def get_enemy_target(self, myteam):
