@@ -6,6 +6,8 @@ make a danger map
 	each char adds numbers to danger map
 	cast target gets a multiplier
 	every my team member gets a map
+	move toward higher number until risk threshold
+	most people are probably not going to separate their team
 
 attack score for each character
 	decreases when abilities are on cooldown

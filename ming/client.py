@@ -47,13 +47,51 @@ init = True
 def printDanger(dangermap):
     for a in range(0,5):
         for b in range(0,5):
-            print(str(dangermap[(b,a)]), end="\t")
+            print("%.5f" % dangermap[(b,a)], end="\t")
         print("")
 
     print()
 #    for a in dangermap:
 #        print(str(a) + "\t" + str(dangermap[a]))
 
+def pointSlope(p1, p2):
+    return (p2[1]-p1[1])/(p2[0]-p1[0])
+
+def adjacentTiles(p, attackRange):
+    t = []
+    px, py = p
+    for a in range(-attackRange, attackRange):
+        tx = px + a
+        if tx < 0 or tx > 4:
+            continue
+        for b in range(-attackRange, attackRange):
+            ty = py+b
+            if gameMap.is_inbounds([tx,ty]):
+                t.append((tx,ty))
+    return t
+
+def tilesAway(p, dist):
+    t = []
+    px, py = p
+    for a in range(-dist, dist+1):
+        tx = px + a
+        if tx < 0 or tx > 4:
+            continue
+        for b in [-dist, dist]:
+            ty = py+b
+            if gameMap.is_inbounds([tx,ty]):
+                t.append((tx,ty))
+    for a in [-dist, dist]:
+        tx = px + a
+        if tx < 0 or tx > 4:
+            continue
+        for b in range(-dist+1, dist):
+            ty = py+b
+            if gameMap.is_inbounds([tx,ty]):
+                t.append((tx,ty))
+    return t
+def distance(p1, p2):
+    return ((p2[0]-p1[0])**2.0 + (p2[1]-p1[1])**2.0)**.5
 
 # Determine actions to take on a given turn, given the server response
 def processTurn(serverResponse):
@@ -83,6 +121,8 @@ def processTurn(serverResponse):
         init = False
         for d in range(0,len(enemyteam)):
             enemyattack[d] = enemyteam[d].attributes.damage * damageWeight
+        for d in range(0,len(myteam)):
+            myattack[d] = myteam[d].attributes.damage * damageWeight
 
 
     dangermap = {
@@ -114,6 +154,7 @@ def processTurn(serverResponse):
            }
     deliciousness = [0,0,0] # appeal to attack
     maxDelish = 0
+    maxDanger = 0
 
     for d in range(0,len(enemyteam)):
         if enemyteam[d].is_dead():
@@ -121,11 +162,43 @@ def processTurn(serverResponse):
             enemydefense[d] = sys.maxint
         else:
             tloc = tuple(enemyteam[d].position) # store the location tuple
-            dangermap[tloc] = enemyattack[d] + dangermap[tloc]
+            t = enemyattack[d] + dangermap[tloc]
+            dangermap[tloc] = t
+            if t > maxDanger:
+                maxDanger = t
+            for a in range(1, 5):
+                for b in tilesAway(tloc, a):
+                    if gameMap.is_inbounds(b):
+                        tb = tuple(b)
+                        t = dangermap[tb]+ dangermap[tloc]*(2.718**(-distance(b,tloc)*(2.1-enemyteam[d].attributes.attackRange)))
+                        dangermap[tb] = t
+                        if t > maxDanger:
+                            maxDanger = t
+
             enemydefense[d] = enemyteam[d].attributes.health * healthWeight + enemyteam[d].attributes.armor * armorWeight
             deliciousness[d] = enemyattack[d] / enemydefense[d]
             if deliciousness[d] > deliciousness[maxDelish]:
                 maxDelish = d
+
+    
+    for a in range(0,5):
+        for b in range(0,5):
+            try:
+                dangermap[(b,a)] = dangermap[(b,a)]/maxDanger
+            except ZeroDivisionError: # celebratory division by zero when we win
+                pass
+
+    riskiness = 0.5
+    highrisk = riskiness + .1
+    lowrisk = 0.5 - 0.1
+
+
+    for d in range(0,len(myteam)):
+        if myteam[d].is_dead():
+            myattack[d] = 0
+            mydefense[d] = sys.maxint
+        else:
+            mydefense[d] = myteam[d].attributes.health * healthWeight + myteam[d].attributes.armor * armorWeight
 
 
     print(enemyattack)
@@ -147,42 +220,113 @@ def processTurn(serverResponse):
     #        target = character
     #        break
 
-    # If we found a target
-    if target:
-        for character in myteam:
-            # If I am in range, either move towards target
-            if character.in_range_of(target, gameMap):
-                # Am I already trying to cast something?
-                if character.casting is None:
-                    cast = False
-                    for abilityId, cooldown in character.abilities.items():
-                        # Do I have an ability not on cooldown
-                        if cooldown == 0:
-                            # If I can, then cast it
-                            ability = game_consts.abilitiesList[int(abilityId)]
-                            # Get ability
-                            actions.append({
-                                "Action": "Cast",
-                                "CharacterId": character.id,
-                                # Am I buffing or debuffing? If buffing, target myself
-                                "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
-                                "AbilityId": int(abilityId)
-                            })
-                            cast = True
-                            break
-                    # Was I able to cast something? Either wise attack
-                    if not cast:
-                        actions.append({
-                            "Action": "Attack",
-                            "CharacterId": character.id,
-                            "TargetId": target.id,
-                        })
-            else: # Not in range, move towards
-                actions.append({
-                    "Action": "Move",
-                    "CharacterId": character.id,
-                    "Location": (4,0) # top right
-                })
+    for character in myteam:
+
+#        abilityId = 12
+#        q, cooldown = character.abilities.items()[2]
+#        print("cooldown " + str(cooldown))
+#        if character.attributes.get_attribute("Stunned") or character.attributes.get_attribute("Silenced") or character.attributes.get_attribute("Rooted"):
+#            actions.append({
+#                "Action": "Cast",
+#                "CharacterId": character.id,
+#                # Am I buffing or debuffing? If buffing, target myself
+#                "TargetId": character.id,
+#                "AbilityId": int(0)
+#            })
+#
+#        elif cooldown == 0:
+#            if dangermap[character.position] > highrisk :
+#                print("sprint")
+#                ability = game_consts.abilitiesList[int(abilityId)]
+#                actions.append({
+#                    "Action": "Cast",
+#                    "CharacterId": character.id,
+#                    # Am I buffing or debuffing? If buffing, target myself
+#                    "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+#                    "AbilityId": int(abilityId)
+#                })
+#            else:
+#
+                # If we found a target
+                if target:
+
+                        #targetdist = ((target.position[0]-character.position[0])**2 + (target.position[1]-character.position[1])**2)**.5
+                        # If I am in range, either move towards target
+                        if character.in_range_of(target, gameMap):# and dangermap[character.position] < highrisk:
+                        #if targetdist <= character.attributes.attackRange+1 and targetdist >= character.attributes.attackRange-1:
+                            # Am I already trying to cast something?
+                            if character.casting is None:
+                                cast = False
+                                for abilityId, cooldown in character.abilities.items():
+                                    # Do I have an ability not on cooldown
+                                    if cooldown == 0:
+                                        # If I can, then cast it
+                                        ability = game_consts.abilitiesList[int(abilityId)]
+                                        if ability["StatChanges"][0]["Change"] >= 0: # only use offensive abilities
+                                            continue
+                                        # Get ability
+                                        actions.append({
+                                            "Action": "Cast",
+                                            "CharacterId": character.id,
+                                            # Am I buffing or debuffing? If buffing, target myself
+                                            "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+                                            "AbilityId": int(abilityId)
+                                        })
+                                        cast = True
+                                        break
+                                # Was I able to cast something? Either wise attack
+                                if not cast:
+                                    actions.append({
+                                        "Action": "Attack",
+                                        "CharacterId": character.id,
+                                        "TargetId": target.id,
+                                    })
+                        else: # Not in range, move towards
+                            #pass
+                            #if targetdist >= character.attributes.attackRange-1: # move away if getting close
+                            #    actions.append({
+                            #        "Action": "Move",
+                            #        "CharacterId": character.id,
+                            #        "Location": (4,0) # top right
+                            #    })
+                            #else: #move towards target
+                            if dangermap[character.position] < riskiness:# or not gameMap.in_vision_of(character.position, target.position):
+                                actions.append({
+                                    "Action": "Move",
+                                    "CharacterId": character.id,
+                                    "TargetId": target.id # top right
+                                })
+                            #else:
+                            #    lowestDangerpoint = 10000
+                            #    lowestDanger = 10000
+                            #    for p in gameMap.get_valid_adjacent_pos(character.position):
+                            #        dangermap[p] = t
+                            #        if t < lowestDanger:
+                            #            lowestDanger = t
+                            #            lowestDangerpoint = p
+                            #        
+                            #    actions.append({
+                            #        "Action": "Move",
+                            #        "CharacterId": character.id,
+                            #        "Location": p 
+                            #    })
+
+       # else:
+       #     print("running?")
+       #     lowestDangerpoint = 10000
+       #     lowestDanger = 10000
+       #     for p in gameMap.get_valid_adjacent_pos(character.position):
+       #         dangermap[p] = t
+       #         if t < lowestDanger:
+       #             lowestDanger = t
+       #             lowestDangerpoint = p
+
+       #             actions.append({
+       #             "Action": "Move",
+       #             "CharacterId": character.id,
+       #             "Location": p 
+       #                 })
+
 
     # Send actions to the server
     return {
