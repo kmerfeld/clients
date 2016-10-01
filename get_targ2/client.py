@@ -80,31 +80,27 @@ class Bot():
             "CharacterId": character.id,
             "TargetId": target.id,
         })
-
+    
     def get_enemy_target(self, myteam):
         #assume target is the one with the lowest health
         #TODO: make this not terrible
+        print(self.previousHealth)
+        #get unit with lowest biggest change in health
+        diff0 = self.previousHealth[0] - self.myteam[0].attributes.health
+        diff1 = self.previousHealth[1] - self.myteam[1].attributes.health
+        diff2 = self.previousHealth[2] - self.myteam[2].attributes.health
 
-        lowest_health = 9999
-        lowest_char = None
-        for unit in self.myteam:
-            print(str(unit.attributes.health))
-            if not unit.is_dead():
-                if unit.attributes.health < lowest_health:
-                    lowest_health = unit.attributes.health
-                    lowest_char = unit;
 
-        #dead_count is to make sure it doesnt crash if everyone is dead
-        dead_count = 0
-        for unit in self.myteam:
-            if unit.is_dead():
-                dead_count += 1
-                print("dead count is " + str(dead_count))
+        lowest_char = 0
+        biggest = diff0
+        if diff1 > biggest:
+            biggest = diff1
+            lowest_char = 1
+        if diff2 > biggest:
+            biggest = diff2
+            lowest_char = 2
 
-        if dead_count == 3:
-            return self.myteam[0]
-        else:
-            return lowest_char
+        return lowest_char
 
     def archer(self, character):
         if character.attributes.health < 0.5*character.attributes.maxHealth and character.position != self.startingPosition and not kiteReleased:
@@ -188,7 +184,7 @@ class Bot():
 
         # Choose a target
         self.target = self.enemyteam[maxDelish]
-        print(str(self.get_enemy_target(self.myteam).name))
+        print(str(self.get_enemy_target(self.myteam)))
         
     #-------------------Archer----------------------------------------
 
