@@ -222,37 +222,37 @@ def processTurn(serverResponse):
 
     for character in myteam:
 
-        abilityId = 12
-        q, cooldown = character.abilities.items()[2]
-        print("cooldown " + str(cooldown))
-        if character.attributes.get_attribute("Stunned") or character.attributes.get_attribute("Silenced") or character.attributes.get_attribute("Rooted"):
-            actions.append({
-                "Action": "Cast",
-                "CharacterId": character.id,
-                # Am I buffing or debuffing? If buffing, target myself
-                "TargetId": character.id,
-                "AbilityId": int(0)
-            })
-
-        elif cooldown == 0:
-            if dangermap[character.position] > highrisk :
-                print("sprint")
-                ability = game_consts.abilitiesList[int(abilityId)]
-                actions.append({
-                    "Action": "Cast",
-                    "CharacterId": character.id,
-                    # Am I buffing or debuffing? If buffing, target myself
-                    "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
-                    "AbilityId": int(abilityId)
-                })
-            else:
-
+#        abilityId = 12
+#        q, cooldown = character.abilities.items()[2]
+#        print("cooldown " + str(cooldown))
+#        if character.attributes.get_attribute("Stunned") or character.attributes.get_attribute("Silenced") or character.attributes.get_attribute("Rooted"):
+#            actions.append({
+#                "Action": "Cast",
+#                "CharacterId": character.id,
+#                # Am I buffing or debuffing? If buffing, target myself
+#                "TargetId": character.id,
+#                "AbilityId": int(0)
+#            })
+#
+#        elif cooldown == 0:
+#            if dangermap[character.position] > highrisk :
+#                print("sprint")
+#                ability = game_consts.abilitiesList[int(abilityId)]
+#                actions.append({
+#                    "Action": "Cast",
+#                    "CharacterId": character.id,
+#                    # Am I buffing or debuffing? If buffing, target myself
+#                    "TargetId": target.id if ability["StatChanges"][0]["Change"] < 0 else character.id,
+#                    "AbilityId": int(abilityId)
+#                })
+#            else:
+#
                 # If we found a target
                 if target:
 
                         #targetdist = ((target.position[0]-character.position[0])**2 + (target.position[1]-character.position[1])**2)**.5
                         # If I am in range, either move towards target
-                        if character.in_range_of(target, gameMap) and dangermap[character.position] < highrisk:
+                        if character.in_range_of(target, gameMap):# and dangermap[character.position] < highrisk:
                         #if targetdist <= character.attributes.attackRange+1 and targetdist >= character.attributes.attackRange-1:
                             # Am I already trying to cast something?
                             if character.casting is None:
@@ -282,7 +282,7 @@ def processTurn(serverResponse):
                                         "TargetId": target.id,
                                     })
                         else: # Not in range, move towards
-                            pass
+                            #pass
                             #if targetdist >= character.attributes.attackRange-1: # move away if getting close
                             #    actions.append({
                             #        "Action": "Move",
@@ -311,21 +311,21 @@ def processTurn(serverResponse):
                             #        "Location": p 
                             #    })
 
-        else:
-            print("running?")
-            lowestDangerpoint = 10000
-            lowestDanger = 10000
-            for p in gameMap.get_valid_adjacent_pos(character.position):
-                dangermap[p] = t
-                if t < lowestDanger:
-                    lowestDanger = t
-                    lowestDangerpoint = p
+       # else:
+       #     print("running?")
+       #     lowestDangerpoint = 10000
+       #     lowestDanger = 10000
+       #     for p in gameMap.get_valid_adjacent_pos(character.position):
+       #         dangermap[p] = t
+       #         if t < lowestDanger:
+       #             lowestDanger = t
+       #             lowestDangerpoint = p
 
-                    actions.append({
-                    "Action": "Move",
-                    "CharacterId": character.id,
-                    "Location": p 
-                        })
+       #             actions.append({
+       #             "Action": "Move",
+       #             "CharacterId": character.id,
+       #             "Location": p 
+       #                 })
 
 
     # Send actions to the server
