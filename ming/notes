@@ -1,0 +1,18 @@
+neural network
+weights on every single stat
+
+make a danger map
+	mark every tile with a score indicating how many negative effects can be had
+	each char adds numbers to danger map
+
+attack score for each character
+	decreases when abilities are on cooldown
+	function of how much damage char can cause
+	how to handle movement?
+	buffs apply multiplier
+defense score for each character
+	function of how able character is able to resist damage
+	resistance to stuns
+		abilities to remove stuns
+		character with ranged buffs increase defense for all characters
+	
