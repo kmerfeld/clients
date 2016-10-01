@@ -1,4 +1,3 @@
-#!/usr/bin/python2
 import socket
 import json
 import os
@@ -15,7 +14,7 @@ from src.game.gamemap import *
 gameMap = GameMap()
 
 # --------------------------- SET THIS IS UP -------------------------
-teamName = "\'MURICA!!!"
+teamName = "Test"
 # ---------------------------------------------------------------------
 
 # Set initial connection data
@@ -24,11 +23,11 @@ def initialResponse():
     return {'TeamName': teamName,
             'Characters': [
                 {"CharacterName": "Druid",
-                 "ClassId": "Assassin"},
+                 "ClassId": "Druid"},
                 {"CharacterName": "Archer",
-                 "ClassId": "Assassin"},
+                 "ClassId": "Archer"},
                 {"CharacterName": "Warrior",
-                 "ClassId": "Assassin"},
+                 "ClassId": "Warrior"},
             ]}
 # ---------------------------------------------------------------------
 
@@ -53,46 +52,12 @@ def processTurn(serverResponse):
                 enemyteam.append(character)
 # ------------------ You shouldn't change above but you can ---------------
 
-
-    #Value of characters
-    def get_priority( char ):
-        if char.name == "Archer":
-            priority = 10
-        if char.name == "Assasin":
-            priority = 9
-        if char.name == "Druid":
-            priority = 8
-        if char.name == "Enchanter":
-            priority = 7
-        if char.name == "Paladin":
-            priority = 6
-        if char.name == "Sorcerer":
-            priority = 5
-        if char.name == "Warrior":
-            priority = 4
-        if char.name == "Wizard":
-            priority = 3
-    
     # Choose a target
-   
-
-    #TODO: find enemy that is most benefitial to kill
     target = None
-    
-    #get list of living characters
-    living_characters = []
     for character in enemyteam:
         if not character.is_dead():
-            living_characters.append(character) 
-
-    
-    #get highest priority
-    target = living_characters[0]
-    for character in living_characters:
-        if get_priority(target) < get_priority(character):
             target = character
-    
-    print(target.name)
+            break
 
     # If we found a target
     if target:
@@ -185,4 +150,4 @@ if __name__ == "__main__":
         if e.errno != errno.ECONNRESET:
             raise  # Not error we are looking for
         pass  # Handle error here.
-    s.close()
+s.close()
