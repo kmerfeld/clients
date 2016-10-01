@@ -36,8 +36,8 @@ mydefense = [0, 0, 0]
 enemyattack = [0, 0, 0]
 enemydefense = [0, 0, 0]
 
-damageWeight = 1
-healthWeight = .1
+damageWeight = 1.0
+healthWeight = .1 #must be floating point
 armorWeight = .1
 
 global init
