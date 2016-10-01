@@ -118,6 +118,28 @@ class Bot():
         else: # Not in range, move towards
             self.moveToTarget(character, self.target)
 
+
+    def get_enemy_target(self, myteam):
+        #assume target is the one with the lowest health
+        #TODO: make this not terrible
+        print(self.previousHealth)
+        #get unit with lowest biggest change in health
+        diff0 = self.previousHealth[0] - self.myteam[0].attributes.health
+        diff1 = self.previousHealth[1] - self.myteam[1].attributes.health
+        diff2 = self.previousHealth[2] - self.myteam[2].attributes.health
+
+
+        lowest_char = 0
+        biggest = diff0
+        if diff1 > biggest:
+            biggest = diff1
+            lowest_char = 1
+        if diff2 > biggest:
+            biggest = diff2
+            lowest_char = 2
+
+        return lowest_char
+
     def distance(p1, p2):
             return ((p2[0]-p1[0])**2.0 + (p2[1]-p1[1])**2.0)**.5
 
@@ -125,9 +147,9 @@ class Bot():
         if character.can_use_ability(self.sprint):
             self.cast(character, self.sprint)
         else:
-            print(character.position)
-            print(self.targetCorner)
-            print(self.landmarks[self.targetCorner])
+            #print(character.position)
+            #print(self.targetCorner)
+            #print(self.landmarks[self.targetCorner])
             if character.position != self.landmarks[self.targetCorner]:
                 self.moveToLocation(character, self.landmarks[self.targetCorner])
             if character.position == self.landmarks[self.targetCorner]:
@@ -154,6 +176,7 @@ class Bot():
                     character = Character()
                     character.serialize(characterJson)
                     self.enemyteam.append(character)
+
 
 
         if self.init: # run this stuff once after figuring out the enemy composition
@@ -189,16 +212,20 @@ class Bot():
         character = self.myteam[0]
         #self.archer(character)
         self.laps(character)
+        self.previousHealth[0] = character.attributes.health
 
     #------------------------------------------------------
         character = self.myteam[1]
         self.archer(character)
-
+        self.previousHealth[1] = character.attributes.health
     #-------------------------------------------------------
 
         character = self.myteam[2]
         self.archer(character)
+        self.previousHealth[2] = character.attributes.health
 
+
+        print(str(self.get_enemy_target(self.myteam)))
     #-------------------------------------------------------
         # Send actions to the server
         return {
